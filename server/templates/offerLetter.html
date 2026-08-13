@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<style>
+  @page { margin: 0; }
+  body {
+    font-family: 'Helvetica Neue', Arial, sans-serif;
+    color: #1a1a1a;
+    margin: 0;
+    padding: 60px 70px;
+    font-size: 13px;
+    line-height: 1.6;
+  }
+  .letterhead {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    border-bottom: 3px solid #1d4ed8;
+    padding-bottom: 16px;
+    margin-bottom: 32px;
+  }
+  .letterhead img { height: 42px; }
+  .letterhead .company-name { font-size: 20px; font-weight: 700; color: #1d4ed8; }
+  .date { text-align: right; margin-bottom: 24px; color: #444; }
+  h1 { font-size: 18px; color: #111; margin-bottom: 4px; }
+  .subject { font-weight: 600; margin: 20px 0; text-decoration: underline; }
+  table.details {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 20px 0;
+  }
+  table.details td {
+    padding: 6px 0;
+    border-bottom: 1px solid #eee;
+  }
+  table.details td:first-child {
+    font-weight: 600;
+    width: 220px;
+    color: #333;
+  }
+  .signature { margin-top: 50px; }
+  .footer {
+    margin-top: 60px;
+    font-size: 10px;
+    color: #888;
+    border-top: 1px solid #eee;
+    padding-top: 10px;
+  }
+</style>
+</head>
+<body>
+  <div class="letterhead">
+    <div class="company-name">{{companyName}}</div>
+    <img src="{{companyLogoUrl}}" alt="logo" />
+  </div>
+
+  <div class="date">{{offerIssueDate}}</div>
+
+  <p>Dear <strong>{{candidateName}}</strong>,</p>
+
+
+  <p class="subject">Subject: Offer of {{employmentType}} - {{designation}}</p>
+
+  <p>
+    We are pleased to offer you the position of <strong>{{designation}}</strong> in the
+    <strong>{{department}}</strong> department at {{companyName}}. This letter outlines the
+    key terms of your {{engagementNoun}} with us.
+  </p>
+
+  <table class="details">
+    <tr><td>Candidate Name</td><td>{{candidateName}}</td></tr>
+    <tr><td>Designation</td><td>{{designation}}</td></tr>
+    <tr><td>Department</td><td>{{department}}</td></tr>
+    <tr><td>Employment Type</td><td>{{employmentTypeLabel}}</td></tr>
+    <tr><td>Date of Joining</td><td>{{dateOfJoining}}</td></tr>
+    {{endDateRow}}
+    <tr><td>Stipend / CTC</td><td>{{stipendOrCTC}}</td></tr>
+    <tr><td>Reporting Manager</td><td>{{reportingManager}}</td></tr>
+  </table>
+
+  <p>
+    Please confirm your acceptance of this offer by logging into your candidate portal.
+    We look forward to having you on the team and are confident this will be a rewarding
+    experience for both of us.
+  </p>
+
+  <div class="signature">
+    <p>Warm regards,</p>
+    <p><strong>HR Team</strong><br />{{companyName}}<br />{{companyAddress}}</p>
+  </div>
+
+  <div class="footer">
+    This is a system-generated offer letter issued via the {{companyName}} HR automation platform.
+  </div>
+</body>
+</html>

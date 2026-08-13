@@ -1,0 +1,20 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+* {
+  -webkit-font-smoothing: antialiased;
+}
+
+body {
+  @apply bg-paper-50 text-ink-900 font-sans;
+}
+
+:focus-visible {
+  outline: 2px solid #0F766E;
+  outline-offset: 2px;
+}
+
+.record-id {
+  @apply font-mono text-xs tracking-tight text-ink-700/60;
+}
