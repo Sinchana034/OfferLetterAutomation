@@ -56,3 +56,12 @@ pnpm-debug.log*
 # Temporary files
 *.tmp
 *.temp
+
+node_modules/
+.env
+.env.*
+!.env.example
+
+.DS_Store
+dist/
+build/
