@@ -1,1 +1,13 @@
+# Dependencies
+node_modules/
+
+# Environment variables
+.env
+.env.*
+!.env.example
+
+# Generated files
+server/generated-pdfs/
+
+# macOS
 .DS_Store
