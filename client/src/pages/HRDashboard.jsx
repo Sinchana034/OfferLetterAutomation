@@ -49,25 +49,25 @@ export default function HRDashboard() {
 
       {/* Dashboard Statistics */}
       <div className="mb-8 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
-        <div className="rounded-lg border border-paper-200 bg-white p-5">
+        <div className="dashboard-card p-6">
           <p className="text-xs font-medium uppercase tracking-wide text-ink-700/60">
             Total Candidates
           </p>
-          <p className="mt-2 text-3xl font-semibold text-ink-900">
+          <p className="relative z-10 mt-3 text-4xl font-bold tracking-tight text-signal-violet">
             {statsLoading ? '—' : stats.totalCandidates}
           </p>
         </div>
 
-        <div className="rounded-lg border border-paper-200 bg-white p-5">
+        <div className="dashboard-card p-6">
           <p className="text-xs font-medium uppercase tracking-wide text-ink-700/60">
             Selected Candidates
           </p>
-          <p className="mt-2 text-3xl font-semibold text-ink-900">
+          <p className="relative z-10 mt-3 text-4xl font-bold tracking-tight text-signal-violet">
             {statsLoading ? '—' : stats.selectedCandidates}
           </p>
         </div>
 
-        <div className="rounded-lg border border-paper-200 bg-white p-5">
+        <div className="dashboard-card p-6">
           <p className="text-xs font-medium uppercase tracking-wide text-ink-700/60">
             Offers Generated
           </p>
@@ -76,7 +76,7 @@ export default function HRDashboard() {
           </p>
         </div>
 
-        <div className="rounded-lg border border-paper-200 bg-white p-5">
+        <div className="dashboard-card p-6">
           <p className="text-xs font-medium uppercase tracking-wide text-ink-700/60">
             Emails Sent
           </p>
@@ -85,7 +85,7 @@ export default function HRDashboard() {
           </p>
         </div>
 
-        <div className="rounded-lg border border-paper-200 bg-white p-5">
+        <div className="dashboard-card p-6">
           <p className="text-xs font-medium uppercase tracking-wide text-ink-700/60">
             Pending Emails
           </p>
@@ -94,7 +94,7 @@ export default function HRDashboard() {
           </p>
         </div>
 
-        <div className="rounded-lg border border-paper-200 bg-white p-5">
+        <div className="dashboard-card p-6">
           <p className="text-xs font-medium uppercase tracking-wide text-ink-700/60">
             Failed Emails
           </p>
@@ -105,16 +105,16 @@ export default function HRDashboard() {
       </div>
 
       {/* Tabs */}
-      <div className="mb-6 flex gap-1 border-b border-paper-200">
+      <div className="mb-6 flex gap-2 rounded-xl border border-paper-200/80 bg-white/60 p-1 backdrop-blur-md">
         {tabs.map((t) => (
           <button
             key={t.id}
             onClick={() => setTab(t.id)}
-            className={`-mb-px border-b-2 px-4 py-2.5 text-sm font-medium transition ${
-              tab === t.id
-                ? 'border-signal-teal text-signal-teal'
-                : 'border-transparent text-ink-700/60 hover:text-ink-900'
-            }`}
+            className={`rounded-lg px-4 py-2.5 text-sm font-medium transition-all duration-200 ${
+            tab === t.id
+              ? 'bg-ink-900 text-white shadow-sm'
+              : 'text-ink-700/60 hover:bg-white/80 hover:text-ink-900'
+          }`}
           >
             {t.label}
           </button>

@@ -2,19 +2,418 @@
 @tailwind components;
 @tailwind utilities;
 
+/* --------------------------------------------------
+   Global
+-------------------------------------------------- */
+
 * {
   -webkit-font-smoothing: antialiased;
+  box-sizing: border-box;
+}
+
+html {
+  min-height: 100%;
+  width: 100%;
 }
 
 body {
-  @apply bg-paper-50 text-ink-900 font-sans;
+  @apply text-ink-900 font-sans;
+
+  min-height: 100vh;
+  width: 100%;
+  margin: 0;
+  overflow-x: hidden;
+
+  background:
+    linear-gradient(
+      120deg,
+      #f8fafc 0%,
+      #f3f0ff 20%,
+      #f8fafc 40%,
+      #eefdfb 60%,
+      #f4f1ff 80%,
+      #f8fafc 100%
+    );
+
+  background-size: 300% 300%;
+  animation: backgroundFlow 14s ease-in-out infinite;
 }
 
+/* --------------------------------------------------
+   Animated Background
+-------------------------------------------------- */
+
+@keyframes backgroundFlow {
+  0% {
+    background-position: 0% 50%;
+  }
+
+  25% {
+    background-position: 50% 100%;
+  }
+
+  50% {
+    background-position: 100% 50%;
+  }
+
+  75% {
+    background-position: 50% 0%;
+  }
+
+  100% {
+    background-position: 0% 50%;
+  }
+}
+
+/* --------------------------------------------------
+   Accessibility
+-------------------------------------------------- */
+
+@media (prefers-reduced-motion: reduce) {
+  body {
+    animation: none;
+  }
+
+  .dashboard-card {
+    transition: none;
+  }
+
+  .animate-fade-in {
+    animation: none;
+  }
+}
+
+/* --------------------------------------------------
+   Focus
+-------------------------------------------------- */
+
 :focus-visible {
-  outline: 2px solid #0F766E;
+  outline: 2px solid #0f766e;
   outline-offset: 2px;
 }
 
+/* --------------------------------------------------
+   Record ID
+-------------------------------------------------- */
+
 .record-id {
   @apply font-mono text-xs tracking-tight text-ink-700/60;
+}
+
+/* --------------------------------------------------
+   Dashboard Cards
+-------------------------------------------------- */
+
+.dashboard-card {
+  position: relative;
+  overflow: hidden;
+
+  min-height: 125px;
+
+  border: 1px solid rgba(255, 255, 255, 0.85);
+
+  background: rgba(255, 255, 255, 0.78);
+
+  backdrop-filter: blur(22px);
+  -webkit-backdrop-filter: blur(22px);
+
+  border-radius: 18px;
+
+  box-shadow:
+    0 12px 30px rgba(15, 23, 42, 0.06),
+    0 2px 8px rgba(15, 23, 42, 0.03);
+
+  transition:
+    transform 0.3s ease,
+    box-shadow 0.3s ease,
+    background 0.3s ease;
+}
+
+/* --------------------------------------------------
+   Dashboard Card Hover
+-------------------------------------------------- */
+
+.dashboard-card:hover {
+  transform: translateY(-3px);
+
+  box-shadow:
+    0 18px 40px rgba(15, 23, 42, 0.08),
+    0 4px 12px rgba(15, 23, 42, 0.04);
+
+  background: rgba(255, 255, 255, 0.88);
+}
+
+/* --------------------------------------------------
+   Dashboard Card Top Gradient
+-------------------------------------------------- */
+
+.dashboard-card::before {
+  content: "";
+
+  position: absolute;
+
+  top: 0;
+  left: 0;
+
+  width: 100%;
+  height: 4px;
+
+  background: linear-gradient(
+    90deg,
+    #7c3aed,
+    #8b5cf6,
+    #14b8a6
+  );
+
+  opacity: 0.9;
+}
+
+/* --------------------------------------------------
+   Dashboard Content
+-------------------------------------------------- */
+
+.dashboard-content {
+  position: relative;
+  z-index: 1;
+
+  width: 100%;
+}
+
+/* --------------------------------------------------
+   Dashboard Shell
+-------------------------------------------------- */
+
+.dashboard-shell {
+  min-height: 100vh;
+  width: 100%;
+}
+
+/* --------------------------------------------------
+   Smooth Selection
+-------------------------------------------------- */
+
+::selection {
+  background: rgba(124, 58, 237, 0.15);
+  color: #0f172a;
+}
+
+/* --------------------------------------------------
+   Scrollbar
+-------------------------------------------------- */
+
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(100, 116, 139, 0.35);
+  border-radius: 999px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(100, 116, 139, 0.55);
+}
+
+/* --------------------------------------------------
+   Form Animations
+-------------------------------------------------- */
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-fade-in {
+  animation: fadeIn 0.3s ease-out;
+}
+
+/* ==================================================
+   RESPONSIVE DESIGN
+================================================== */
+
+/* --------------------------------------------------
+   Tablet
+   768px and below
+-------------------------------------------------- */
+
+@media (max-width: 768px) {
+  body {
+    background-size: 400% 400%;
+  }
+
+  .dashboard-card {
+    min-height: 110px;
+    border-radius: 15px;
+  }
+
+  .dashboard-card:hover {
+    transform: none;
+  }
+
+  .dashboard-content {
+    width: 100%;
+  }
+
+  .record-id {
+    font-size: 0.7rem;
+  }
+}
+
+/* --------------------------------------------------
+   Mobile
+   640px and below
+-------------------------------------------------- */
+
+@media (max-width: 640px) {
+  body {
+    background-size: 500% 500%;
+    animation-duration: 18s;
+  }
+
+  /* Dashboard cards */
+
+  .dashboard-card {
+    min-height: 100px;
+    border-radius: 14px;
+
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+
+    box-shadow:
+      0 8px 20px rgba(15, 23, 42, 0.05),
+      0 2px 6px rgba(15, 23, 42, 0.025);
+  }
+
+  .dashboard-card::before {
+    height: 3px;
+  }
+
+  /* Prevent hover movement on touch devices */
+
+  .dashboard-card:hover {
+    transform: none;
+
+    box-shadow:
+      0 8px 20px rgba(15, 23, 42, 0.05),
+      0 2px 6px rgba(15, 23, 42, 0.025);
+  }
+
+  /* Smaller record text */
+
+  .record-id {
+    font-size: 0.65rem;
+    letter-spacing: -0.01em;
+  }
+
+  /* Better mobile scrollbar */
+
+  ::-webkit-scrollbar {
+    width: 5px;
+    height: 5px;
+  }
+}
+
+/* --------------------------------------------------
+   Small phones
+   480px and below
+-------------------------------------------------- */
+
+@media (max-width: 480px) {
+  body {
+    background-size: 600% 600%;
+    animation-duration: 20s;
+  }
+
+  .dashboard-card {
+    min-height: 90px;
+    border-radius: 12px;
+  }
+
+  .dashboard-card::before {
+    height: 3px;
+  }
+}
+
+/* --------------------------------------------------
+   Very small phones
+   380px and below
+-------------------------------------------------- */
+
+@media (max-width: 380px) {
+  .dashboard-card {
+    min-height: 85px;
+    border-radius: 10px;
+  }
+
+  .record-id {
+    font-size: 0.6rem;
+  }
+}
+
+/* --------------------------------------------------
+   Prevent accidental horizontal overflow
+-------------------------------------------------- */
+
+img,
+svg,
+video,
+canvas {
+  max-width: 100%;
+}
+
+input,
+select,
+textarea,
+button {
+  max-width: 100%;
+}
+
+/* --------------------------------------------------
+   Mobile form controls
+-------------------------------------------------- */
+
+@media (max-width: 640px) {
+  input,
+  select,
+  textarea,
+  button {
+    font-size: 16px;
+  }
+}
+
+/* --------------------------------------------------
+   Tables
+-------------------------------------------------- */
+
+@media (max-width: 768px) {
+  .table-responsive {
+    width: 100%;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .table-responsive table {
+    min-width: 700px;
+  }
+}
+
+/* --------------------------------------------------
+   Utility for content that should scroll horizontally
+-------------------------------------------------- */
+
+.overflow-x-mobile {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
 }

@@ -95,9 +95,13 @@ function StaffList({ refreshKey }) {
 
   const load = useCallback(async () => {
     setLoading(true);
-    const { data } = await api.get('/users');
-    setUsers(data.users);
-    setLoading(false);
+
+    try {
+      const { data } = await api.get('/users');
+      setUsers(data.users);
+    } finally {
+      setLoading(false);
+    }
   }, []);
 
   useEffect(() => {
@@ -105,58 +109,197 @@ function StaffList({ refreshKey }) {
   }, [load, refreshKey]);
 
   const toggleStatus = async (user) => {
-    await api.patch(`/users/${user._id}/status`, { isActive: !user.isActive });
+    await api.patch(`/users/${user._id}/status`, {
+      isActive: !user.isActive,
+    });
+
     load();
   };
 
   return (
     <div className="overflow-hidden rounded-lg border border-paper-200 bg-white">
-      <table className="w-full text-left text-sm">
-        <thead className="border-b border-paper-200 bg-paper-100 text-xs uppercase tracking-wide text-ink-700/70">
-          <tr>
-            <th className="px-4 py-3 font-medium">Name</th>
-            <th className="px-4 py-3 font-medium">Role</th>
-            <th className="px-4 py-3 font-medium">Department</th>
-            <th className="px-4 py-3 font-medium">Status</th>
-            <th className="px-4 py-3 font-medium">Action</th>
-          </tr>
-        </thead>
-        <tbody className="divide-y divide-paper-200">
-          {loading && (
+
+      {/* ================= DESKTOP TABLE ================= */}
+      <div className="hidden md:block overflow-x-auto">
+        <table className="w-full min-w-[700px] text-left text-sm">
+          <thead className="border-b border-paper-200 bg-paper-100 text-xs uppercase tracking-wide text-ink-700/70">
             <tr>
-              <td colSpan={5} className="px-4 py-8 text-center text-ink-700/60">
-                Loading staff…
-              </td>
+              <th className="px-4 py-3 font-medium">Name</th>
+              <th className="px-4 py-3 font-medium">Role</th>
+              <th className="px-4 py-3 font-medium">Department</th>
+              <th className="px-4 py-3 font-medium">Status</th>
+              <th className="px-4 py-3 font-medium">Action</th>
             </tr>
-          )}
-          {!loading &&
-            users.map((u) => (
-              <tr key={u._id} className="hover:bg-paper-50">
-                <td className="px-4 py-3">
-                  <div className="font-medium text-ink-900">{u.name}</div>
-                  <div className="record-id">{u.email}</div>
-                </td>
-                <td className="px-4 py-3 capitalize text-ink-800">{u.role}</td>
-                <td className="px-4 py-3 text-ink-800">{u.department || '—'}</td>
-                <td className="px-4 py-3">
-                  <span className={u.isActive ? 'text-signal-teal' : 'text-signal-rose'}>
-                    {u.isActive ? 'Active' : 'Deactivated'}
-                  </span>
-                </td>
-                <td className="px-4 py-3">
-                  {u.role !== 'admin' && (
-                    <button
-                      onClick={() => toggleStatus(u)}
-                      className="rounded-md border border-paper-200 px-2.5 py-1 text-xs font-medium text-ink-800 hover:border-signal-violet hover:text-signal-violet"
-                    >
-                      {u.isActive ? 'Deactivate' : 'Activate'}
-                    </button>
-                  )}
+          </thead>
+
+          <tbody className="divide-y divide-paper-200">
+            {loading && (
+              <tr>
+                <td
+                  colSpan={5}
+                  className="px-4 py-8 text-center text-ink-700/60"
+                >
+                  Loading staff…
                 </td>
               </tr>
-            ))}
-        </tbody>
-      </table>
+            )}
+
+            {!loading && users.length === 0 && (
+              <tr>
+                <td
+                  colSpan={5}
+                  className="px-4 py-8 text-center text-ink-700/60"
+                >
+                  No staff accounts found.
+                </td>
+              </tr>
+            )}
+
+            {!loading &&
+              users.map((u) => (
+                <tr
+                  key={u._id}
+                  className="hover:bg-paper-50"
+                >
+                  <td className="px-4 py-3">
+                    <div className="font-medium text-ink-900">
+                      {u.name}
+                    </div>
+
+                    <div className="record-id break-all">
+                      {u.email}
+                    </div>
+                  </td>
+
+                  <td className="px-4 py-3 capitalize text-ink-800">
+                    {u.role}
+                  </td>
+
+                  <td className="px-4 py-3 text-ink-800">
+                    {u.department || '—'}
+                  </td>
+
+                  <td className="px-4 py-3">
+                    <span
+                      className={
+                        u.isActive
+                          ? 'text-signal-teal'
+                          : 'text-signal-rose'
+                      }
+                    >
+                      {u.isActive ? 'Active' : 'Deactivated'}
+                    </span>
+                  </td>
+
+                  <td className="px-4 py-3">
+                    {u.role !== 'admin' && (
+                      <button
+                        onClick={() => toggleStatus(u)}
+                        className="rounded-md border border-paper-200 px-2.5 py-1 text-xs font-medium text-ink-800 transition hover:border-signal-violet hover:text-signal-violet"
+                      >
+                        {u.isActive ? 'Deactivate' : 'Activate'}
+                      </button>
+                    )}
+                  </td>
+                </tr>
+              ))}
+          </tbody>
+        </table>
+      </div>
+
+
+      {/* ================= MOBILE CARDS ================= */}
+      <div className="block md:hidden">
+
+        {loading && (
+          <div className="px-4 py-8 text-center text-sm text-ink-700/60">
+            Loading staff…
+          </div>
+        )}
+
+        {!loading && users.length === 0 && (
+          <div className="px-4 py-8 text-center text-sm text-ink-700/60">
+            No staff accounts found.
+          </div>
+        )}
+
+        {!loading &&
+          users.map((u) => (
+            <div
+              key={u._id}
+              className="border-b border-paper-200 p-4 last:border-b-0"
+            >
+
+              {/* Name + Email */}
+              <div className="mb-4">
+                <div className="font-medium text-ink-900">
+                  {u.name}
+                </div>
+
+                <div className="record-id mt-1 break-all">
+                  {u.email}
+                </div>
+              </div>
+
+
+              {/* Details */}
+              <div className="grid grid-cols-2 gap-x-4 gap-y-3 text-sm">
+
+                <div>
+                  <p className="text-xs font-medium uppercase tracking-wide text-ink-700/50">
+                    Role
+                  </p>
+
+                  <p className="mt-1 capitalize text-ink-800">
+                    {u.role}
+                  </p>
+                </div>
+
+
+                <div>
+                  <p className="text-xs font-medium uppercase tracking-wide text-ink-700/50">
+                    Status
+                  </p>
+
+                  <p
+                    className={`mt-1 font-medium ${
+                      u.isActive
+                        ? 'text-signal-teal'
+                        : 'text-signal-rose'
+                    }`}
+                  >
+                    {u.isActive ? 'Active' : 'Deactivated'}
+                  </p>
+                </div>
+
+
+                <div className="col-span-2">
+                  <p className="text-xs font-medium uppercase tracking-wide text-ink-700/50">
+                    Department
+                  </p>
+
+                  <p className="mt-1 text-ink-800">
+                    {u.department || '—'}
+                  </p>
+                </div>
+
+              </div>
+
+
+              {/* Action */}
+              {u.role !== 'admin' && (
+                <button
+                  onClick={() => toggleStatus(u)}
+                  className="mt-4 w-full rounded-md border border-paper-200 px-3 py-2 text-sm font-medium text-ink-800 transition hover:border-signal-violet hover:text-signal-violet"
+                >
+                  {u.isActive ? 'Deactivate' : 'Activate'}
+                </button>
+              )}
+
+            </div>
+          ))}
+      </div>
+
     </div>
   );
 }
@@ -206,16 +349,16 @@ useEffect(() => {
 
     {/* Dashboard Statistics */}
       <div className="mb-8 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
-        <div className="rounded-lg border border-paper-200 bg-white p-5">
+        <div className="dashboard-card p-6">
           <p className="text-xs font-medium uppercase tracking-wide text-ink-700/60">
             Total Candidates
           </p>
-          <p className="mt-2 text-3xl font-semibold text-ink-900">
+          <p className="relative z-10 mt-3 text-4xl font-bold tracking-tight text-signal-violet">
             {statsLoading ? '—' : stats.totalCandidates}
           </p>
-        </div>
+      </div>
 
-        <div className="rounded-lg border border-paper-200 bg-white p-5">
+        <div className="dashboard-card p-6">
           <p className="text-xs font-medium uppercase tracking-wide text-ink-700/60">
             Selected Candidates
           </p>
@@ -224,7 +367,7 @@ useEffect(() => {
           </p>
         </div>
 
-        <div className="rounded-lg border border-paper-200 bg-white p-5">
+        <div className="dashboard-card p-6">
           <p className="text-xs font-medium uppercase tracking-wide text-ink-700/60">
             Offers Generated
           </p>
@@ -233,7 +376,7 @@ useEffect(() => {
           </p>
         </div>
 
-        <div className="rounded-lg border border-paper-200 bg-white p-5">
+        <div className="dashboard-card p-6">
           <p className="text-xs font-medium uppercase tracking-wide text-ink-700/60">
             Emails Sent
           </p>
@@ -242,7 +385,7 @@ useEffect(() => {
           </p>
         </div>
 
-        <div className="rounded-lg border border-paper-200 bg-white p-5">
+        <div className="dashboard-card p-6">
           <p className="text-xs font-medium uppercase tracking-wide text-ink-700/60">
             Pending Emails
           </p>
@@ -251,7 +394,7 @@ useEffect(() => {
           </p>
         </div>
 
-        <div className="rounded-lg border border-paper-200 bg-white p-5">
+        <div className="dashboard-card p-6">
           <p className="text-xs font-medium uppercase tracking-wide text-ink-700/60">
             Failed Emails
           </p>
