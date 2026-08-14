@@ -136,11 +136,23 @@ const generateOffer = asyncHandler(async (req, res) => {
 // @route POST /api/offers/:id/resend
 // @access Admin, HR only
 const resendOffer = asyncHandler(async (req, res) => {
-  const offer = await Offer.findOne({ _id: req.params.id, ...req.departmentFilter });
+  console.log('=== RESEND START ===');
+  console.log('Offer ID:', req.params.id);
+
+  const offer = await Offer.findOne({
+    _id: req.params.id,
+    ...req.departmentFilter,
+  });
+
   if (!offer) {
+    console.log('Offer not found');
     res.status(404);
     throw new Error('Offer not found');
   }
+
+  console.log('Offer found:', offer._id);
+  console.log('Candidate:', offer.candidateName);
+  console.log('Email:', offer.candidateEmail);
 
   const {
     candidateName,
@@ -155,35 +167,51 @@ const resendOffer = asyncHandler(async (req, res) => {
 
   const hasEdits = Object.keys(req.body || {}).length > 0;
 
+  console.log('Has edits:', hasEdits);
+
   if (hasEdits) {
     if (candidateName) offer.candidateName = candidateName;
     if (designation) offer.designation = designation;
     if (dateOfJoining) offer.dateOfJoining = dateOfJoining;
     if (stipendOrCTC) offer.stipendOrCTC = stipendOrCTC;
-    if (reportingManager !== undefined) offer.reportingManager = reportingManager;
+    if (reportingManager !== undefined) {
+      offer.reportingManager = reportingManager;
+    }
 
     if (department) {
       if (!DEPARTMENTS.includes(department)) {
         res.status(400);
-        throw new Error(`Department must be one of: ${DEPARTMENTS.join(', ')}`);
+        throw new Error(
+          `Department must be one of: ${DEPARTMENTS.join(', ')}`
+        );
       }
+
       offer.department = department;
     }
 
     if (employmentType) {
       if (!EMPLOYMENT_TYPES.includes(employmentType)) {
         res.status(400);
-        throw new Error(`Employment type must be one of: ${EMPLOYMENT_TYPES.join(', ')}`);
+        throw new Error(
+          `Employment type must be one of: ${EMPLOYMENT_TYPES.join(', ')}`
+        );
       }
+
       offer.employmentType = employmentType;
     }
 
     if (offer.employmentType === 'Internship') {
-      const duration = internshipDurationMonths ? Number(internshipDurationMonths) : offer.internshipDurationMonths;
+      const duration = internshipDurationMonths
+        ? Number(internshipDurationMonths)
+        : offer.internshipDurationMonths;
+
       if (!INTERNSHIP_DURATIONS.includes(duration)) {
         res.status(400);
-        throw new Error(`Internship duration must be one of: ${INTERNSHIP_DURATIONS.join(', ')} months`);
+        throw new Error(
+          `Internship duration must be one of: ${INTERNSHIP_DURATIONS.join(', ')} months`
+        );
       }
+
       offer.internshipDurationMonths = duration;
       offer.endDate = addMonths(offer.dateOfJoining, duration);
     } else {
@@ -192,42 +220,123 @@ const resendOffer = asyncHandler(async (req, res) => {
     }
 
     await offer.save();
+
+    console.log('Offer edits saved');
   }
+
+  // =========================
+  // PDF GENERATION
+  // =========================
 
   let pdfPath;
+
   try {
-    pdfPath = await generateOfferPdf(offer); // regenerate - picks up any edits above
+    console.log('STEP 1: Starting PDF generation');
+
+    pdfPath = await generateOfferPdf(offer);
+
+    console.log('STEP 2: PDF generated');
+    console.log('PDF path:', pdfPath);
+
     offer.pdfUrl = `/generated-pdfs/offer-${offer._id}.pdf`;
   } catch (err) {
+    console.error('STEP PDF FAILED');
+    console.error('PDF error:', err);
+    console.error('PDF error message:', err.message);
+    console.error('PDF error stack:', err.stack);
+
     offer.emailStatus = 'Failed';
     offer.emailError = `PDF generation failed: ${err.message}`;
+
     await offer.save();
+
     res.status(500);
-    throw new Error('PDF regeneration failed');
+    throw new Error(`PDF regeneration failed: ${err.message}`);
   }
 
-  const candidate = await Candidate.findOne({ offer: offer._id }).select('+activationToken');
+  // =========================
+  // CANDIDATE
+  // =========================
+
+  console.log('STEP 3: Finding candidate');
+
+  const candidate = await Candidate.findOne({
+    offer: offer._id,
+  }).select('+activationToken');
+
+  console.log(
+    'Candidate found:',
+    candidate ? candidate._id : 'NO CANDIDATE'
+  );
+
   let activationLink = `${process.env.CANDIDATE_PORTAL_URL}`;
+
   if (candidate && !candidate.isActivated) {
+    console.log('STEP 4: Generating activation token');
+
     const { rawToken, hashedToken } = generateActivationToken();
+
     candidate.activationToken = hashedToken;
-    candidate.activationTokenExpires = Date.now() + 7 * 24 * 60 * 60 * 1000;
+    candidate.activationTokenExpires =
+      Date.now() + 7 * 24 * 60 * 60 * 1000;
+
     await candidate.save();
-    activationLink = `${process.env.CANDIDATE_PORTAL_URL}?token=${rawToken}`;
+
+    activationLink =
+      `${process.env.CANDIDATE_PORTAL_URL}?token=${rawToken}`;
+
+    console.log('Activation token generated');
   }
 
-  const result = await sendOfferEmail({ offer, pdfPath, activationLink });
+  // =========================
+  // EMAIL
+  // =========================
+
+  console.log('STEP 5: Sending email');
+
+  const result = await sendOfferEmail({
+    offer,
+    pdfPath,
+    activationLink,
+  });
+
+  console.log('STEP 6: Email result:', result);
+
   offer.emailAttempts += 1;
   offer.emailStatus = result.success ? 'Sent' : 'Failed';
   offer.emailError = result.success ? null : result.error;
+
   await offer.save();
 
-  const sheetResult = await upsertOfferRow(offer, req.user.name);
-  offer.sheetSyncStatus = sheetResult.success ? 'Synced' : 'Failed';
-  offer.sheetSyncError = sheetResult.success ? null : sheetResult.error;
+  // =========================
+  // GOOGLE SHEETS
+  // =========================
+
+  console.log('STEP 7: Updating Google Sheet');
+
+  const sheetResult = await upsertOfferRow(
+    offer,
+    req.user.name
+  );
+
+  console.log('STEP 8: Google Sheet result:', sheetResult);
+
+  offer.sheetSyncStatus = sheetResult.success
+    ? 'Synced'
+    : 'Failed';
+
+  offer.sheetSyncError = sheetResult.success
+    ? null
+    : sheetResult.error;
+
   await offer.save();
 
-  res.json({ success: true, offer });
+  console.log('=== RESEND SUCCESS ===');
+
+  res.json({
+    success: true,
+    offer,
+  });
 });
 
 // @desc  List offers - Admin/HR see all, Manager sees only their department
