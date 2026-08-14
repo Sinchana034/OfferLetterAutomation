@@ -11,3 +11,4 @@ server/generated-pdfs/
 
 # macOS
 .DS_Store
+server/generated-pdfs/
