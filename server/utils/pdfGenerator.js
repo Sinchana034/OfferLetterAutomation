@@ -58,20 +58,43 @@ const generateOfferPdf = async (offer) => {
   const fileName = `offer-${offer._id}.pdf`;
   const filePath = path.join(OUTPUT_DIR, fileName);
 
+  console.log(`Generating PDF for offer ${offer._id}...`);
+
   const browser = await puppeteer.launch({
     headless: true,
-    args: ['--no-sandbox', '--disable-setuid-sandbox'],
+    args: [
+      '--no-sandbox',
+      '--disable-setuid-sandbox',
+      '--disable-dev-shm-usage',
+    ],
   });
 
   try {
     const page = await browser.newPage();
-    await page.setContent(html, { waitUntil: 'networkidle0' });
+
+    await page.setContent(html, {
+      waitUntil: 'domcontentloaded',
+      timeout: 30000,
+    });
+
     await page.pdf({
       path: filePath,
       format: 'A4',
       printBackground: true,
-      margin: { top: '0', bottom: '0', left: '0', right: '0' },
+      margin: {
+        top: '0',
+        bottom: '0',
+        left: '0',
+        right: '0',
+      },
     });
+
+    console.log(`PDF generated successfully: ${filePath}`);
+  } catch (error) {
+    console.error('PDF GENERATION ERROR:', error);
+    console.error('PDF ERROR MESSAGE:', error.message);
+    console.error('PDF ERROR STACK:', error.stack);
+    throw error;
   } finally {
     await browser.close();
   }
